@@ -10,6 +10,8 @@ updates:
       interval: "daily"
       time: "05:00"
       timezone: "Europe/London"
+    cooldown:
+      default-days: 3
     open-pull-requests-limit: 10
     groups:
       python-deps:
@@ -21,6 +23,8 @@ updates:
     directory: "/src/frontend"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 3
     open-pull-requests-limit: 10
     groups:
       npm-deps:
@@ -32,6 +36,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 3
     open-pull-requests-limit: 5
     groups:
       docker-images:
@@ -48,6 +54,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 3
     open-pull-requests-limit: 5
     groups:
       gh-actions:
