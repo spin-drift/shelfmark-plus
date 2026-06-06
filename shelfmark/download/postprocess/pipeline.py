@@ -17,6 +17,7 @@ implementation stay modular.
 
 from __future__ import annotations
 
+from .group import group_book_files
 from .custom_script import (
     CustomScriptContext,
     CustomScriptExecution,
@@ -55,6 +56,7 @@ from .workspace import (
 )
 
 __all__ = [
+    "group_book_files",
     "CustomScriptContext",
     "CustomScriptExecution",
     "CustomScriptTransferSummary",

@@ -15,6 +15,7 @@ from shelfmark.core.naming import (
     parse_naming_template,
     sanitize_filename,
 )
+from shelfmark.download.postprocess.group import group_book_files
 from shelfmark.core.utils import is_audiobook as check_audiobook
 from shelfmark.download.fs import (
     atomic_copy,
@@ -171,6 +172,37 @@ def transfer_book_files(
     """Transfer discovered book files into their final destination layout."""
     if not book_files:
         return [], "No book files found", {"hardlink": 0, "copy": 0, "move": 0}
+
+    # When a flat folder contains files from multiple distinct books, route each
+    # group into its own subfolder so ABS sees one folder per book.
+    if organization_mode in ("organize", "rename") and len(book_files) > 1:
+        groups = group_book_files(book_files)
+        # Only split when at least one group has multiple files — that signals a
+        # real chapter group was detected alongside standalone books. If every
+        # group has exactly one file (no chapter pattern found), fall through to
+        # existing part-numbering logic so we don't scatter same-book files.
+        if len(groups) > 1 and any(len(g) > 1 for g in groups.values()):
+            all_final: list[Path] = []
+            all_op_counts: dict[str, int] = {"hardlink": 0, "copy": 0, "move": 0}
+            last_error: str | None = None
+            for prefix, group_files in groups.items():
+                subdir = destination / sanitize_filename(prefix)
+                run_blocking_io(subdir.mkdir, parents=True, exist_ok=True)
+                paths, err, ops = transfer_book_files(
+                    group_files,
+                    subdir,
+                    task,
+                    use_hardlink=use_hardlink,
+                    is_torrent=is_torrent,
+                    preserve_source=preserve_source,
+                    organization_mode=organization_mode,
+                )
+                all_final.extend(paths)
+                for op, count in ops.items():
+                    all_op_counts[op] = all_op_counts.get(op, 0) + count
+                if err:
+                    last_error = err
+            return all_final, last_error, all_op_counts
 
     is_audiobook = check_audiobook(task.content_type)
     organization_mode = organization_mode or get_file_organization(is_audiobook=is_audiobook)
