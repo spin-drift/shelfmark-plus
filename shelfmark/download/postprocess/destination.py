@@ -40,9 +40,11 @@ def validate_destination(
         status_callback("error", f"Destination is not a directory: {destination}")
         return False
 
+    created_by_us = False
     if not destination_exists:
         try:
             run_blocking_io(destination.mkdir, parents=True, exist_ok=True)
+            created_by_us = True
         except (OSError, PermissionError) as exc:
             log_path_permission_context("destination_create", destination)
             logger.warning("Cannot create destination: %s (%s)", destination, exc)
@@ -63,6 +65,11 @@ def validate_destination(
         log_path_permission_context("destination_write_probe", destination)
         logger.warning("Destination not writable: %s (%s)", destination, exc)
         status_callback("error", f"Destination not writable: {destination} ({exc})")
+        if created_by_us:
+            try:
+                run_blocking_io(destination.rmdir)
+            except OSError:
+                pass
         return False
 
     return True
