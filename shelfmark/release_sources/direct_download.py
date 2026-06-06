@@ -574,7 +574,7 @@ def _parse_book_info_page(
                     slow_urls_no_waitlist.add(href)
                 else:
                     slow_urls_with_waitlist.add(href)
-        except AttributeError, TypeError:
+        except (AttributeError, TypeError):
             pass
 
     logger.debug(
@@ -1229,6 +1229,9 @@ def _get_download_url(
     return downloader.get_absolute_url(link, url)
 
 
+_AA_COUNTDOWN_MAX_RETRIES = 3
+
+
 def _extract_slow_download_url(
     soup: BeautifulSoup,
     link: str,
@@ -1237,6 +1240,7 @@ def _extract_slow_download_url(
     status_callback: Callable[[str, str | None], None] | None,
     selector: network.AAMirrorSelector,
     source_context: str | None = None,
+    _countdown_attempts: int = 0,
 ) -> str:
     """Extract download URL from AA slow download pages."""
     html_str = str(soup)
@@ -1301,6 +1305,14 @@ def _extract_slow_download_url(
 
     countdown_seconds = _extract_countdown_seconds(soup, html_str)
     if countdown_seconds > 0:
+        if _countdown_attempts >= _AA_COUNTDOWN_MAX_RETRIES:
+            logger.warning(
+                "Countdown retry limit (%s) reached for %s, giving up",
+                _AA_COUNTDOWN_MAX_RETRIES,
+                title,
+            )
+            return ""
+
         max_countdown_seconds = 600
         sleep_time = min(countdown_seconds, max_countdown_seconds)
         if countdown_seconds > max_countdown_seconds:
@@ -1309,7 +1321,7 @@ def _extract_slow_download_url(
                 countdown_seconds,
                 max_countdown_seconds,
             )
-        logger.info("AA waitlist: %ss for %s", sleep_time, title)
+        logger.info("AA waitlist: %ss for %s (attempt %s/%s)", sleep_time, title, _countdown_attempts + 1, _AA_COUNTDOWN_MAX_RETRIES)
 
         # Live countdown with status updates
         for remaining in range(sleep_time, 0, -1):
@@ -1330,8 +1342,21 @@ def _extract_slow_download_url(
         if status_callback and source_context:
             status_callback("resolving", f"{source_context} - Fetching")
 
-        return _get_download_url(
-            link, title, cancel_flag, status_callback, selector, source_context
+        html = downloader.html_get_page(
+            link, selector=selector, cancel_flag=cancel_flag, status_callback=status_callback
+        )
+        if not html:
+            return ""
+        new_soup = BeautifulSoup(_html_response_text(html), "html.parser")
+        return _extract_slow_download_url(
+            new_soup,
+            link,
+            title,
+            cancel_flag,
+            status_callback,
+            selector,
+            source_context,
+            _countdown_attempts + 1,
         )
 
     link_texts = [a.get_text(strip=True)[:50] for a in soup.find_all("a", href=True)[:10]]
@@ -1398,7 +1423,7 @@ def _parse_countdown_seconds_from_element(element: Tag) -> int | None:
     """Parse an integer countdown from a tag, returning None when invalid."""
     try:
         seconds = int(element.get_text(strip=True))
-    except ValueError, TypeError:
+    except (ValueError, TypeError):
         return None
 
     if 0 < seconds < _AA_COUNTDOWN_MAX_SECONDS:
