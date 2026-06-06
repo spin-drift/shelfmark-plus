@@ -1548,6 +1548,25 @@ def _emit_request_update_events(updated_requests: list[dict[str, Any]]) -> None:
         )
 
 
+def _enrich_queue_status_with_display_names(
+    status: dict[str, dict[str, Any]], db: Any
+) -> None:
+    """Add display_name to each book dict in the queue status using a per-user cache."""
+    cache: dict[int, str | None] = {}
+    for bucket in status.values():
+        for book in bucket.values():
+            uid_raw = book.get("user_id")
+            if not isinstance(uid_raw, int) or uid_raw <= 0:
+                continue
+            if uid_raw not in cache:
+                try:
+                    row = db.get_user(user_id=uid_raw)
+                    cache[uid_raw] = row.get("display_name") if row else None
+                except Exception:
+                    cache[uid_raw] = None
+            book["display_name"] = cache[uid_raw]
+
+
 @app.route("/api/status", methods=["GET"])
 @login_required
 def api_status() -> Response | tuple[Response, int]:
@@ -1571,6 +1590,7 @@ def api_status() -> Response | tuple[Response, int]:
                 user_id=user_id,
             )
             _emit_request_update_events(updated_requests)
+            _enrich_queue_status_with_display_names(status, user_db)
         return jsonify(status)
     except _OPERATIONAL_ERRORS as e:
         logger.error_trace(f"Status error: {e}")

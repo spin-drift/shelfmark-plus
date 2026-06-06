@@ -55,6 +55,7 @@ export interface Book {
   authors?: string[];
   titles_by_language?: Record<string, string>;
   username?: string;
+  display_name?: string | null;
   retry_available?: boolean;
 }
 
@@ -246,6 +247,7 @@ export interface RequestRecord {
   created_at: string;
   updated_at: string;
   username?: string;
+  display_name?: string | null;
 }
 
 export interface QueuedDownloadResult {
@@ -260,7 +262,7 @@ export interface QueuedDownloadResult {
 
 export type RequestSubmissionResult = RequestRecord | QueuedDownloadResult;
 
-export type BooksOutputMode = 'folder' | 'booklore' | 'email';
+export type BooksOutputMode = 'folder' | 'booklore' | 'email' | 'noop';
 
 export interface AppConfig {
   calibre_web_url: string;

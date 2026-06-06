@@ -81,17 +81,26 @@ const getDownloadProgress = (
   return undefined;
 };
 
+const toUserDisplayLabel = (displayName: unknown, username: unknown): string | undefined => {
+  const name = toOptionalText(displayName);
+  if (name) {
+    return name;
+  }
+  return toOptionalText(username);
+};
+
 export const downloadToActivityItem = (book: Book, statusKey: DownloadStatusKey): ActivityItem => {
   const visualStatus = statusKeyToVisualStatus(statusKey);
   const requestId =
     typeof book.request_id === 'number' && Number.isFinite(book.request_id) && book.request_id > 0
       ? Math.trunc(book.request_id)
       : undefined;
+  const userLabel = toUserDisplayLabel(book.display_name, book.username);
   const metaLine = joinMetaParts([
     toOptionalText(book.format)?.toUpperCase(),
     toOptionalText(book.size),
     toOptionalText(book.source_display_name) || toSourceLabel(book.source),
-    toOptionalText(book.username),
+    userLabel,
   ]);
   const progress = getDownloadProgress(visualStatus, book.progress);
   const statusDetail = toOptionalText(book.status_message);
@@ -111,6 +120,7 @@ export const downloadToActivityItem = (book: Book, statusKey: DownloadStatusKey)
     progressAnimated: isActiveDownloadStatus(visualStatus),
     timestamp: toEpochMillis(book.added_time),
     username: toOptionalText(book.username),
+    displayName: toOptionalText(book.display_name) || undefined,
     downloadBookId: book.id,
     downloadRetryAvailable,
     downloadPath: toOptionalText(book.download_path),
@@ -136,20 +146,21 @@ const buildRequestMetaLine = (
   releaseData: Record<string, unknown>,
   viewerRole: 'user' | 'admin',
 ): string => {
+  const userLabel =
+    viewerRole === 'admin' ? toUserDisplayLabel(record.display_name, record.username) : undefined;
+
   if (record.request_level === 'book') {
     const contentType = toOptionalText(record.content_type || bookData.content_type)?.toLowerCase();
     const requestTypeLabel = contentType === 'audiobook' ? 'Audiobook request' : 'Book request';
-    const username = viewerRole === 'admin' ? toOptionalText(record.username) : undefined;
-    return joinMetaParts([requestTypeLabel, username]);
+    return joinMetaParts([requestTypeLabel, userLabel]);
   }
 
   const format = toOptionalText(releaseData.format)?.toUpperCase();
   const size = toOptionalText(releaseData.size);
   const source = toSourceLabel(releaseData.source || record.source_hint);
-  const username = viewerRole === 'admin' ? toOptionalText(record.username) : undefined;
 
-  const line = joinMetaParts([format, size, source, username]);
-  return line || joinMetaParts(['Release request', username]);
+  const line = joinMetaParts([format, size, source, userLabel]);
+  return line || joinMetaParts(['Release request', userLabel]);
 };
 
 export const requestToActivityItem = (
@@ -176,6 +187,7 @@ export const requestToActivityItem = (
     adminNote: toOptionalText(record.admin_note),
     timestamp,
     username: toOptionalText(record.username),
+    displayName: toOptionalText(record.display_name) || undefined,
     requestId: record.id,
     requestLevel: record.request_level,
     requestNote: toOptionalText(record.note),

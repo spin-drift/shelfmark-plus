@@ -94,6 +94,9 @@ const parseHistoryBook = (value: unknown): Book | null => {
       ? { source_display_name: value.source_display_name }
       : {}),
     ...(typeof value.username === 'string' ? { username: value.username } : {}),
+    ...(value.display_name !== undefined
+      ? { display_name: typeof value.display_name === 'string' ? value.display_name : null }
+      : {}),
     ...(typeof value.progress === 'number' && Number.isFinite(value.progress)
       ? { progress: value.progress }
       : {}),
@@ -170,6 +173,9 @@ const parseHistoryRequestRecord = (value: unknown): RequestRecord | null => {
     created_at,
     updated_at,
     ...(value.username !== undefined ? { username: value.username } : {}),
+    ...(value.display_name !== undefined
+      ? { display_name: typeof value.display_name === 'string' ? value.display_name : null }
+      : {}),
     ...(value.delivery_state !== undefined ? { delivery_state: value.delivery_state } : {}),
     ...(value.delivery_updated_at !== undefined
       ? { delivery_updated_at: value.delivery_updated_at }
