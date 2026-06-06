@@ -915,6 +915,11 @@ def download_settings() -> list[SettingsField]:
                     "label": "Grimmory (API)",
                     "description": "Upload files directly to Grimmory",
                 },
+                {
+                    "value": "noop",
+                    "label": "Leave in Place",
+                    "description": "Do nothing — file stays wherever it was downloaded",
+                },
             ],
             default="folder",
             user_overridable=True,
