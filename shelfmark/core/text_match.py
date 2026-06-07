@@ -95,16 +95,25 @@ _RE_BARE_VOLUME = re.compile(
     re.IGNORECASE,
 )
 
-# Comma/hyphen/colon volume suffix with explicit separator: ", Book 3", "- Volume II", ": Part 1"
+# Comma/hyphen/colon volume suffix with explicit separator: ", Book 3", "- Volume II", ": Part 1 of 3"
 _RE_VOLUME_SUFFIX = re.compile(
-    r"\s*[,\-:]\s*(?:book|vol\.?|volume|part)\s+\S+\s*$",
+    r"\s*[,\-:]\s*(?:book|vol\.?|volume|part)\s+\S+(?:\s+of\s+\S+)?\s*$",
     re.IGNORECASE,
 )
 
-# Genre/marketing descriptor after colon: ": A Novel", ": A Gripping Thriller"
+# Genre/marketing descriptor after colon: ": A Novel", ": A Gripping Thriller", ": A Dual Biography"
 _RE_GENRE_SUBTITLE = re.compile(
     r"\s*:\s*(?:a|an)\s+(?:\w+\s+)?(?:novel|novella|memoir|thriller|mystery|romance|"
-    r"adventure|epic|saga|chronicle|fantasy|story|tale)\s*$",
+    r"adventure|epic|saga|chronicle|fantasy|story|tale|biography|autobiography|"
+    r"collection|anthology)\s*$",
+    re.IGNORECASE,
+)
+
+# Edition/reprint subtitle: ": 25th Anniversary Edition", ": Revised Edition", ": Illustrated Edition"
+_RE_EDITION_SUBTITLE = re.compile(
+    r"\s*:\s+(?:(?:\w+\s+)*)?(?:anniversary|revised|expanded|updated|illustrated|"
+    r"deluxe|collector'?s?|special|complete|uncut|definitive|enhanced|restored|"
+    r"original|critical)\s+edition\s*$",
     re.IGNORECASE,
 )
 
@@ -127,6 +136,7 @@ _TITLE_STRIP_PATTERNS = (
     _RE_BARE_VOLUME,
     _RE_LONG_COLON_SUBTITLE,
     _RE_GENRE_SUBTITLE,
+    _RE_EDITION_SUBTITLE,
     _RE_VOLUME_SUFFIX,
     _RE_DASH_SUBTITLE,
 )
