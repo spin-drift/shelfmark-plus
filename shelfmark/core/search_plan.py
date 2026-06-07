@@ -176,6 +176,8 @@ def build_release_search_plan(
         full_variant = ReleaseSearchVariant(title=full_title, author=author, languages=None)
         if not any(v.query == full_variant.query for v in title_variants):
             title_variants.append(full_variant)
+        if not any(v.query == full_variant.query for v in grouped_variants):
+            grouped_variants.append(full_variant)
 
     # If no titles could be built, fall back to ISBN queries.
     if not title_variants and isbn_candidates:

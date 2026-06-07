@@ -90,6 +90,11 @@ class TestReleaseSearchPlan:
         assert queries[-1] == "Dune (Dune Chronicles, #1) Frank Herbert"
         assert len(queries) >= 2
 
+        # grouped_title_variants (used by Anna's Archive) must also include the full fallback
+        grouped_queries = [v.query for v in plan.grouped_title_variants]
+        assert grouped_queries[0] == "Dune Frank Herbert"
+        assert grouped_queries[-1] == "Dune (Dune Chronicles, #1) Frank Herbert"
+
     def test_no_extra_variant_when_title_not_strippable(self, monkeypatch):
         import shelfmark.core.search_plan as sp
 
