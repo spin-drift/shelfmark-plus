@@ -121,7 +121,7 @@ def test_search_no_dcc_offer_releases_connection_and_caches_empty_result(monkeyp
     )
 
     book = BookMetadata(provider="hardcover", provider_id="abc", title="Missing Result")
-    plan = SimpleNamespace(primary_query="Missing Result")
+    plan = SimpleNamespace(title_variants=[SimpleNamespace(query="Missing Result")])
 
     releases = source.search(book, plan, content_type="audiobook")
 

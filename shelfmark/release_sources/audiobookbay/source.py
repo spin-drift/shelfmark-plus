@@ -195,13 +195,13 @@ class AudiobookBaySource(ReleaseSource):
         if plan.manual_query:
             query_candidates.append(plan.manual_query.strip())
         elif plan.title_variants:
-            variant = plan.title_variants[0]
-            combined_query = f"{variant.title} {variant.author}".strip()
-            title_only_query = (variant.title or "").strip()
-            if combined_query:
-                query_candidates.append(combined_query)
-            if title_only_query and title_only_query.lower() != combined_query.lower():
-                query_candidates.append(title_only_query)
+            for variant in plan.title_variants:
+                combined_query = f"{variant.title} {variant.author}".strip()
+                title_only_query = (variant.title or "").strip()
+                if combined_query:
+                    query_candidates.append(combined_query)
+                if title_only_query and title_only_query.lower() != combined_query.lower():
+                    query_candidates.append(title_only_query)
         elif book.title:
             query_candidates.append(book.title.strip())
 

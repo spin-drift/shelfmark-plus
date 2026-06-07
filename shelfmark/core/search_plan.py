@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from shelfmark.core.config import config
+from shelfmark.core.text_match import generate_title_search_variants
 from shelfmark.metadata_providers import (
     BookMetadata,
     build_localized_search_titles,
@@ -111,7 +112,10 @@ def build_release_search_plan(
         resolved_manual_query = manual_query.strip()[:MANUAL_QUERY_MAX_LEN] or None
 
     author = _pick_search_author(book)
-    base_title = _pick_search_title(book)
+    raw_title = _pick_search_title(book)
+    title_candidates = generate_title_search_variants(raw_title)
+    base_title = title_candidates[0]
+    full_title = title_candidates[-1]
 
     if resolved_manual_query:
         # Manual override: use the raw query as-is (no language/title expansion).
@@ -165,6 +169,13 @@ def build_release_search_plan(
         for title in expanded_titles
         if title
     ]
+
+    # If stripping produced a shorter clean form, append the full original title as a
+    # final fallback variant so sources can try the complete title if the short one misses.
+    if full_title != base_title:
+        full_variant = ReleaseSearchVariant(title=full_title, author=author, languages=None)
+        if not any(v.query == full_variant.query for v in title_variants):
+            title_variants.append(full_variant)
 
     # If no titles could be built, fall back to ISBN queries.
     if not title_variants and isbn_candidates:

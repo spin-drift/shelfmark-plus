@@ -3,6 +3,7 @@ import pytest
 from shelfmark.core.text_match import (
     DEFAULT_TITLE_MATCH_THRESHOLD,
     author_surname,
+    generate_title_search_variants,
     normalize_isbn,
     significant_tokens,
     title_tokens_match,
@@ -86,6 +87,94 @@ class TestTitleTokensMatch:
 
     def test_default_threshold(self):
         assert DEFAULT_TITLE_MATCH_THRESHOLD == 0.85
+
+
+class TestGenerateTitleSearchVariants:
+    def test_strips_parenthetical_series_info(self):
+        assert generate_title_search_variants("Dune (Dune Chronicles, #1)") == [
+            "Dune",
+            "Dune (Dune Chronicles, #1)",
+        ]
+
+    def test_strips_parenthetical_book_number(self):
+        assert generate_title_search_variants("Mistborn (Book 1)") == [
+            "Mistborn",
+            "Mistborn (Book 1)",
+        ]
+
+    def test_strips_parenthetical_volume(self):
+        assert generate_title_search_variants("Foundation (Vol. 1)") == [
+            "Foundation",
+            "Foundation (Vol. 1)",
+        ]
+
+    def test_strips_genre_marketing_descriptor(self):
+        assert generate_title_search_variants("Project Hail Mary: A Novel") == [
+            "Project Hail Mary",
+            "Project Hail Mary: A Novel",
+        ]
+
+    def test_strips_adjective_genre_descriptor(self):
+        assert generate_title_search_variants("The Girl on the Train: A Gripping Thriller") == [
+            "The Girl on the Train",
+            "The Girl on the Train: A Gripping Thriller",
+        ]
+
+    def test_strips_long_colon_subtitle(self):
+        result = generate_title_search_variants(
+            "The Fellowship of the Ring: Being the First Part of The Lord of the Rings"
+        )
+        assert result == [
+            "The Fellowship of the Ring",
+            "The Fellowship of the Ring: Being the First Part of The Lord of the Rings",
+        ]
+
+    def test_strips_long_colon_subtitle_comma_title(self):
+        result = generate_title_search_variants(
+            "Salt, Fat, Acid, Heat: Mastering the Elements of Good Cooking"
+        )
+        assert result == [
+            "Salt, Fat, Acid, Heat",
+            "Salt, Fat, Acid, Heat: Mastering the Elements of Good Cooking",
+        ]
+
+    def test_no_strip_short_colon_subtitle_three_words(self):
+        # "The Final Empire" is only 3 words — below the ≥4 word threshold
+        assert generate_title_search_variants("Mistborn: The Final Empire") == [
+            "Mistborn: The Final Empire"
+        ]
+
+    def test_strips_comma_book_number_suffix(self):
+        assert generate_title_search_variants("The Name of the Wind, Book 1") == [
+            "The Name of the Wind",
+            "The Name of the Wind, Book 1",
+        ]
+
+    def test_strips_hyphen_volume_suffix(self):
+        assert generate_title_search_variants("Words of Radiance - Volume 2") == [
+            "Words of Radiance",
+            "Words of Radiance - Volume 2",
+        ]
+
+    def test_strips_em_dash_subtitle(self):
+        result = generate_title_search_variants("Recursion — A Novel About Memory")
+        assert result == ["Recursion", "Recursion — A Novel About Memory"]
+
+    def test_no_strip_short_title(self):
+        assert generate_title_search_variants("IT") == ["IT"]
+
+    def test_no_strip_numeric_title(self):
+        assert generate_title_search_variants("1984") == ["1984"]
+
+    def test_no_strip_already_clean(self):
+        assert generate_title_search_variants("The Final Empire") == ["The Final Empire"]
+
+    def test_empty_string_returns_empty(self):
+        assert generate_title_search_variants("") == []
+
+    def test_whitespace_normalized(self):
+        result = generate_title_search_variants("  Dune   (Dune Chronicles, #1)  ")
+        assert result == ["Dune", "Dune (Dune Chronicles, #1)"]
 
 
 class TestNormalizeIsbn:
