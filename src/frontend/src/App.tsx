@@ -2774,10 +2774,13 @@ function App() {
         parsedParams={parsedParams}
         config={config}
         contentType={contentType}
+        combinedMode={combinedMode}
+        combinedModeAllowed={combinedModeAllowed}
         advancedFilters={advancedFilters}
         resolvedMetadataDefaultSort={resolvedMetadataDefaultSort}
         resolvedMetadataSortOptions={resolvedMetadataSortOptions}
         setContentType={setContentType}
+        setCombinedMode={setCombinedMode}
         setSearchInput={setSearchInput}
         setAdvancedFilters={setAdvancedFilters}
         setShowAdvanced={setShowAdvanced}
