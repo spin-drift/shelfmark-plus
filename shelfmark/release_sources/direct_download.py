@@ -203,8 +203,18 @@ _AA_COUNTDOWN_MAX_SECONDS = 300
 # --- Distant-path language detection ---
 
 _DISTANT_PATH_EXTENSIONS = (
-    "epub", "mobi", "azw3", "fb2", "djvu", "cbz", "cbr",
-    "pdf", "zip", "rar", "m4b", "mp3",
+    "epub",
+    "mobi",
+    "azw3",
+    "fb2",
+    "djvu",
+    "cbz",
+    "cbr",
+    "pdf",
+    "zip",
+    "rar",
+    "m4b",
+    "mp3",
 )
 _DISTANT_PATH_EXTENSION_PATTERN = "|".join(re.escape(e) for e in _DISTANT_PATH_EXTENSIONS)
 _DISTANT_PATH_PATTERN = re.compile(
@@ -273,7 +283,7 @@ def _language_alias_to_code() -> dict[str, str]:
 
         try:
             raw = json.loads(data_path.read_text(encoding="utf-8"))
-        except (OSError, ValueError, TypeError):
+        except OSError, ValueError, TypeError:
             _LANGUAGE_ALIAS_TO_CODE = {}
             return _LANGUAGE_ALIAS_TO_CODE
 
@@ -819,7 +829,7 @@ def _parse_book_info_page(
                     slow_urls_no_waitlist.add(href)
                 else:
                     slow_urls_with_waitlist.add(href)
-        except (AttributeError, TypeError):
+        except AttributeError, TypeError:
             pass
 
     logger.debug(
@@ -1566,7 +1576,13 @@ def _extract_slow_download_url(
                 countdown_seconds,
                 max_countdown_seconds,
             )
-        logger.info("AA waitlist: %ss for %s (attempt %s/%s)", sleep_time, title, _countdown_attempts + 1, _AA_COUNTDOWN_MAX_RETRIES)
+        logger.info(
+            "AA waitlist: %ss for %s (attempt %s/%s)",
+            sleep_time,
+            title,
+            _countdown_attempts + 1,
+            _AA_COUNTDOWN_MAX_RETRIES,
+        )
 
         # Live countdown with status updates
         for remaining in range(sleep_time, 0, -1):
@@ -1668,7 +1684,7 @@ def _parse_countdown_seconds_from_element(element: Tag) -> int | None:
     """Parse an integer countdown from a tag, returning None when invalid."""
     try:
         seconds = int(element.get_text(strip=True))
-    except (ValueError, TypeError):
+    except ValueError, TypeError:
         return None
 
     if 0 < seconds < _AA_COUNTDOWN_MAX_SECONDS:

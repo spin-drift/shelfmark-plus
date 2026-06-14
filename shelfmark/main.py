@@ -364,7 +364,7 @@ def _resolve_release_content_type(data: dict[str, Any], source: Any) -> tuple[st
         for raw_category in categories:
             try:
                 category_id = int(raw_category)
-            except (TypeError, ValueError):
+            except TypeError, ValueError:
                 continue
             if min_cat <= category_id <= max_cat:
                 return "audiobook", True
@@ -408,7 +408,7 @@ def _resolve_policy_mode_for_current_user(*, source: Any, content_type: Any) -> 
     if db_user_id is not None:
         try:
             user_settings = user_db.get_user_settings(int(db_user_id))
-        except (TypeError, ValueError):
+        except TypeError, ValueError:
             user_settings = None
 
     effective = merge_request_policy_settings(global_settings, user_settings)
@@ -480,7 +480,7 @@ def _resolve_download_user_context(
 
     try:
         target_user_id = int(on_behalf_of_user_id)
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         return db_user_id, username, (jsonify({"error": "Invalid on_behalf_of_user_id"}), 400)
 
     if target_user_id <= 0:
@@ -753,7 +753,7 @@ def proxy_auth_middleware() -> Response | tuple[Response, int] | None:
             if raw_db_user_id is not None:
                 try:
                     session_db_user = user_db.get_user(user_id=int(raw_db_user_id))
-                except (TypeError, ValueError):
+                except TypeError, ValueError:
                     session_db_user = None
 
             session_db_username = (
@@ -829,7 +829,7 @@ def login_required(
                 ):
                     return jsonify({"error": "Admin access required"}), 403
 
-            except (RuntimeError, TypeError, ValueError):
+            except RuntimeError, TypeError, ValueError:
                 logger.exception("Admin access check error")
                 return jsonify({"error": "Internal Server Error"}), 500
 
@@ -1259,7 +1259,7 @@ def _notify_admin_for_terminal_download_status(
     raw_owner_user_id = getattr(task, "user_id", None)
     try:
         owner_user_id = int(raw_owner_user_id) if raw_owner_user_id is not None else None
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         owner_user_id = None
 
     content_type = normalize_optional_text(getattr(task, "content_type", None))
@@ -1451,7 +1451,7 @@ def _task_owned_by_actor(
     raw_task_user_id = getattr(task, "user_id", None)
     try:
         task_user_id = int(raw_task_user_id) if raw_task_user_id is not None else None
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         task_user_id = None
 
     if actor_user_id is not None and task_user_id is not None:
@@ -1548,9 +1548,7 @@ def _emit_request_update_events(updated_requests: list[dict[str, Any]]) -> None:
         )
 
 
-def _enrich_queue_status_with_display_names(
-    status: dict[str, dict[str, Any]], db: Any
-) -> None:
+def _enrich_queue_status_with_display_names(status: dict[str, dict[str, Any]], db: Any) -> None:
     """Add display_name to each book dict in the queue status using a per-user cache."""
     cache: dict[int, str | None] = {}
     for bucket in status.values():
@@ -1562,7 +1560,7 @@ def _enrich_queue_status_with_display_names(
                 try:
                     row = db.get_user(user_id=uid_raw)
                     cache[uid_raw] = row.get("display_name") if row else None
-                except (AttributeError, KeyError, TypeError):
+                except AttributeError, KeyError, TypeError:
                     cache[uid_raw] = None
             book["display_name"] = cache[uid_raw]
 

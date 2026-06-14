@@ -1,4 +1,3 @@
-
 from shelfmark.core.text_match import (
     DEFAULT_TITLE_MATCH_THRESHOLD,
     author_surname,
