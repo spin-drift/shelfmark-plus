@@ -1,6 +1,5 @@
 """Tests for WatchlistDB — schema creation, CRUD, and idempotency."""
 
-import json
 import os
 import sqlite3
 import tempfile
@@ -69,6 +68,7 @@ def test_user(full_db):
 # Schema creation
 # ------------------------------------------------------------------
 
+
 class TestSchema:
     def test_creates_watchlist_authors_table(self, watchlist_db, db_path):
         conn = sqlite3.connect(db_path)
@@ -98,8 +98,16 @@ class TestSchema:
         cols = {row[1] for row in conn.execute("PRAGMA table_info(watchlist_authors)")}
         conn.close()
         expected = {
-            "id", "user_id", "author_name", "hardcover_author_id", "ol_author_key",
-            "watch_content_types", "is_active", "deleted_at", "created_at", "updated_at",
+            "id",
+            "user_id",
+            "author_name",
+            "hardcover_author_id",
+            "ol_author_key",
+            "watch_content_types",
+            "is_active",
+            "deleted_at",
+            "created_at",
+            "updated_at",
         }
         assert expected <= cols
 
@@ -108,9 +116,18 @@ class TestSchema:
         cols = {row[1] for row in conn.execute("PRAGMA table_info(watchlist_releases)")}
         conn.close()
         expected = {
-            "id", "watch_id", "user_id", "provider", "provider_book_id",
-            "book_data", "publish_date", "content_type", "action_status",
-            "request_id", "detected_at", "actioned_at",
+            "id",
+            "watch_id",
+            "user_id",
+            "provider",
+            "provider_book_id",
+            "book_data",
+            "publish_date",
+            "content_type",
+            "action_status",
+            "request_id",
+            "detected_at",
+            "actioned_at",
         }
         assert expected <= cols
 
@@ -118,6 +135,7 @@ class TestSchema:
 # ------------------------------------------------------------------
 # add_author
 # ------------------------------------------------------------------
+
 
 class TestAddAuthor:
     def test_add_author_hardcover(self, test_user):
@@ -193,9 +211,7 @@ class TestAddAuthor:
 
     def test_duplicate_hardcover_id_raises(self, test_user):
         user, wdb = test_user
-        wdb.add_author(
-            user_id=user["id"], author_name="Author A", hardcover_author_id="42"
-        )
+        wdb.add_author(user_id=user["id"], author_name="Author A", hardcover_author_id="42")
         with pytest.raises(ValueError, match="already exists"):
             wdb.add_author(
                 user_id=user["id"], author_name="Author A Again", hardcover_author_id="42"
@@ -203,9 +219,7 @@ class TestAddAuthor:
 
     def test_duplicate_ol_key_raises(self, test_user):
         user, wdb = test_user
-        wdb.add_author(
-            user_id=user["id"], author_name="Author B", ol_author_key="/authors/OL1A"
-        )
+        wdb.add_author(user_id=user["id"], author_name="Author B", ol_author_key="/authors/OL1A")
         with pytest.raises(ValueError, match="already exists"):
             wdb.add_author(
                 user_id=user["id"], author_name="Author B Again", ol_author_key="/authors/OL1A"
@@ -215,6 +229,7 @@ class TestAddAuthor:
 # ------------------------------------------------------------------
 # get_author / list_authors
 # ------------------------------------------------------------------
+
 
 class TestGetListAuthors:
     def test_get_author_returns_entry(self, test_user):
@@ -245,9 +260,7 @@ class TestGetListAuthors:
 
     def test_list_authors_include_inactive(self, test_user):
         user, wdb = test_user
-        e = wdb.add_author(
-            user_id=user["id"], author_name="Inactive", hardcover_author_id="3"
-        )
+        e = wdb.add_author(user_id=user["id"], author_name="Inactive", hardcover_author_id="3")
         wdb.update_author(e["id"], is_active=False)
         authors = wdb.list_authors(user["id"], include_inactive=True)
         assert any(a["id"] == e["id"] for a in authors)
@@ -266,38 +279,31 @@ class TestGetListAuthors:
 # update_author / remove_author
 # ------------------------------------------------------------------
 
+
 class TestUpdateRemoveAuthor:
     def test_toggle_inactive(self, test_user):
         user, wdb = test_user
-        e = wdb.add_author(
-            user_id=user["id"], author_name="Toggle Me", hardcover_author_id="10"
-        )
+        e = wdb.add_author(user_id=user["id"], author_name="Toggle Me", hardcover_author_id="10")
         updated = wdb.update_author(e["id"], is_active=False)
         assert updated is not None
         assert updated["is_active"] == 0
 
     def test_update_content_types(self, test_user):
         user, wdb = test_user
-        e = wdb.add_author(
-            user_id=user["id"], author_name="Update Types", hardcover_author_id="11"
-        )
+        e = wdb.add_author(user_id=user["id"], author_name="Update Types", hardcover_author_id="11")
         updated = wdb.update_author(e["id"], watch_content_types=["audiobook"])
         assert updated is not None
         assert updated["watch_content_types"] == ["audiobook"]
 
     def test_update_rejects_invalid_content_type(self, test_user):
         user, wdb = test_user
-        e = wdb.add_author(
-            user_id=user["id"], author_name="Bad Update", hardcover_author_id="12"
-        )
+        e = wdb.add_author(user_id=user["id"], author_name="Bad Update", hardcover_author_id="12")
         with pytest.raises(ValueError, match="Invalid content types"):
             wdb.update_author(e["id"], watch_content_types=["comic"])
 
     def test_remove_author_soft_deletes(self, test_user):
         user, wdb = test_user
-        e = wdb.add_author(
-            user_id=user["id"], author_name="Remove Me", hardcover_author_id="20"
-        )
+        e = wdb.add_author(user_id=user["id"], author_name="Remove Me", hardcover_author_id="20")
         result = wdb.remove_author(e["id"])
         assert result is True
         assert wdb.get_author(e["id"]) is None
@@ -307,9 +313,7 @@ class TestUpdateRemoveAuthor:
 
     def test_remove_author_is_idempotent(self, test_user):
         user, wdb = test_user
-        e = wdb.add_author(
-            user_id=user["id"], author_name="Remove Twice", hardcover_author_id="21"
-        )
+        e = wdb.add_author(user_id=user["id"], author_name="Remove Twice", hardcover_author_id="21")
         wdb.remove_author(e["id"])
         result = wdb.remove_author(e["id"])
         assert result is False
@@ -318,6 +322,7 @@ class TestUpdateRemoveAuthor:
 # ------------------------------------------------------------------
 # upsert_release
 # ------------------------------------------------------------------
+
 
 class TestUpsertRelease:
     def _sample_book_data(self) -> dict:
@@ -372,9 +377,7 @@ class TestUpsertRelease:
 
     def test_upsert_rejects_invalid_content_type(self, test_user):
         user, wdb = test_user
-        entry = wdb.add_author(
-            user_id=user["id"], author_name="Author", hardcover_author_id="100"
-        )
+        entry = wdb.add_author(user_id=user["id"], author_name="Author", hardcover_author_id="100")
         with pytest.raises(ValueError, match="content_type"):
             wdb.upsert_release(
                 watch_id=entry["id"],
@@ -387,9 +390,7 @@ class TestUpsertRelease:
 
     def test_upsert_rejects_empty_book_data(self, test_user):
         user, wdb = test_user
-        entry = wdb.add_author(
-            user_id=user["id"], author_name="Author", hardcover_author_id="101"
-        )
+        entry = wdb.add_author(user_id=user["id"], author_name="Author", hardcover_author_id="101")
         with pytest.raises(ValueError, match="book_data"):
             wdb.upsert_release(
                 watch_id=entry["id"],
@@ -405,6 +406,7 @@ class TestUpsertRelease:
 # list_releases / update_release_action
 # ------------------------------------------------------------------
 
+
 class TestReleasesQueryAndUpdate:
     def _add_release(self, wdb, watch_id, user_id, book_id, content_type="ebook"):
         return wdb.upsert_release(
@@ -418,9 +420,7 @@ class TestReleasesQueryAndUpdate:
 
     def test_list_releases_returns_user_releases(self, test_user):
         user, wdb = test_user
-        entry = wdb.add_author(
-            user_id=user["id"], author_name="Author", hardcover_author_id="200"
-        )
+        entry = wdb.add_author(user_id=user["id"], author_name="Author", hardcover_author_id="200")
         self._add_release(wdb, entry["id"], user["id"], "book-a")
         self._add_release(wdb, entry["id"], user["id"], "book-b")
         releases = wdb.list_releases(user["id"])
@@ -428,9 +428,7 @@ class TestReleasesQueryAndUpdate:
 
     def test_list_releases_filter_by_status(self, test_user):
         user, wdb = test_user
-        entry = wdb.add_author(
-            user_id=user["id"], author_name="Author", hardcover_author_id="201"
-        )
+        entry = wdb.add_author(user_id=user["id"], author_name="Author", hardcover_author_id="201")
         r = self._add_release(wdb, entry["id"], user["id"], "book-c")
         wdb.update_release_action(r["id"], action_status="queued")
         detected = wdb.list_releases(user["id"], action_status="detected")
@@ -440,9 +438,7 @@ class TestReleasesQueryAndUpdate:
 
     def test_update_release_action_sets_status(self, test_user):
         user, wdb = test_user
-        entry = wdb.add_author(
-            user_id=user["id"], author_name="Author", hardcover_author_id="202"
-        )
+        entry = wdb.add_author(user_id=user["id"], author_name="Author", hardcover_author_id="202")
         r = self._add_release(wdb, entry["id"], user["id"], "book-d")
         updated = wdb.update_release_action(r["id"], action_status="skipped")
         assert updated is not None
@@ -451,9 +447,7 @@ class TestReleasesQueryAndUpdate:
 
     def test_update_release_action_rejects_invalid_status(self, test_user):
         user, wdb = test_user
-        entry = wdb.add_author(
-            user_id=user["id"], author_name="Author", hardcover_author_id="203"
-        )
+        entry = wdb.add_author(user_id=user["id"], author_name="Author", hardcover_author_id="203")
         r = self._add_release(wdb, entry["id"], user["id"], "book-e")
         with pytest.raises(ValueError, match="action_status"):
             wdb.update_release_action(r["id"], action_status="purchased")
@@ -463,13 +457,12 @@ class TestReleasesQueryAndUpdate:
 # Cascade on user delete
 # ------------------------------------------------------------------
 
+
 class TestCascade:
     def test_delete_user_cascades_to_authors(self, full_db, db_path):
         udb, wdb = full_db
         user = udb.create_user(username="cascade_user", password_hash="x")
-        wdb.add_author(
-            user_id=user["id"], author_name="Cascade Author", hardcover_author_id="999"
-        )
+        wdb.add_author(user_id=user["id"], author_name="Cascade Author", hardcover_author_id="999")
         udb.delete_user(user["id"])
         conn = sqlite3.connect(db_path)
         conn.execute("PRAGMA foreign_keys = ON")

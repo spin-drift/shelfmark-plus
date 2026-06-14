@@ -1,4 +1,4 @@
-"""Watchlist database for Pulsarr author monitoring."""
+"""Watchlist database for Shelfmark author monitoring."""
 
 from __future__ import annotations
 
@@ -76,9 +76,7 @@ WHERE action_status = 'detected';
 """
 
 _VALID_CONTENT_TYPES: frozenset[str] = frozenset({"ebook", "audiobook"})
-_VALID_ACTION_STATUSES: frozenset[str] = frozenset(
-    {"detected", "queued", "skipped", "ignored"}
-)
+_VALID_ACTION_STATUSES: frozenset[str] = frozenset({"detected", "queued", "skipped", "ignored"})
 
 
 def _validate_content_types(value: list[str]) -> None:
@@ -202,10 +200,11 @@ class WatchlistDB:
                 if result is None:
                     msg = "Failed to load newly created watch entry"
                     raise RuntimeError(msg)
-                return result
             except sqlite3.IntegrityError as e:
                 msg = f"Watch entry already exists: {e}"
                 raise ValueError(msg) from e
+            else:
+                return result
             finally:
                 conn.close()
 

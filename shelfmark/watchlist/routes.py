@@ -1,4 +1,4 @@
-"""Flask blueprint for Pulsarr watchlist API endpoints."""
+"""Flask blueprint for Shelfmark watchlist API endpoints."""
 
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ _watchlist_db: WatchlistDB | None = None
 
 def init_watchlist_routes(watchlist_db: WatchlistDB) -> None:
     """Bind the WatchlistDB instance used by route handlers."""
-    global _watchlist_db  # noqa: PLW0603
+    global _watchlist_db
     _watchlist_db = watchlist_db
 
 
@@ -38,12 +38,13 @@ def _get_current_user_id() -> int | None:
     Mirrors the pattern used in existing Shelfmark route handlers.
     """
     from flask import session
+
     raw = session.get("db_user_id")
     if raw is None:
         return None
     try:
         return int(raw)
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         return None
 
 
@@ -54,6 +55,7 @@ def _error(message: str, status: int = 400) -> Any:
 # ------------------------------------------------------------------
 # Author watch endpoints
 # ------------------------------------------------------------------
+
 
 @watchlist_bp.get("/authors")
 def list_authors() -> Any:
@@ -168,6 +170,7 @@ def update_author(watch_id: int) -> Any:
 # ------------------------------------------------------------------
 # Release endpoints
 # ------------------------------------------------------------------
+
 
 @watchlist_bp.get("/releases")
 def list_releases() -> Any:

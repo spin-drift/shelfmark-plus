@@ -80,8 +80,6 @@ from shelfmark.core.requests_service import (
     sync_delivery_states_from_queue_status,
 )
 from shelfmark.core.user_db import UserDB
-from shelfmark.watchlist.db import WatchlistDB
-from shelfmark.watchlist.routes import init_watchlist_routes, watchlist_bp
 from shelfmark.core.utils import normalize_base_path
 from shelfmark.download import orchestrator as backend
 from shelfmark.release_sources import (
@@ -90,6 +88,8 @@ from shelfmark.release_sources import (
     SourceUnavailableError,
     get_source_display_name,
 )
+from shelfmark.watchlist.db import WatchlistDB
+from shelfmark.watchlist.routes import init_watchlist_routes, watchlist_bp
 
 if TYPE_CHECKING:
     from shelfmark.metadata_providers import BookMetadata, MetadataProvider
