@@ -201,7 +201,10 @@ class WatchlistDB:
                     msg = "Failed to load newly created watch entry"
                     raise RuntimeError(msg)
             except sqlite3.IntegrityError as e:
-                msg = f"Watch entry already exists: {e}"
+                # Don't surface the raw sqlite error (which can reveal index/constraint
+                # names) to the API caller; log it server-side instead.
+                logger.warning("watchlist_authors integrity error: %s", e)
+                msg = "Watch entry already exists"
                 raise ValueError(msg) from e
             else:
                 return result
