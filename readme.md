@@ -5,6 +5,14 @@
 > [!NOTE]
 > This project is in a stable state as of May 2026 but is not under active maintenance. 
 
+> [!IMPORTANT]
+> **This fork is a meta-fork of [calibrain/shelfmark](https://github.com/calibrain/shelfmark)** that selectively ports noteworthy work from community forks while keeping the Shelfmark identity, license, and naming intact. Each port is reviewed per-commit; rebranding, license switches, and major infrastructure changes are left out. Currently tracking:
+>
+> - [NemesisHubris/litfinder](https://github.com/NemesisHubris/litfinder) — bug fixes (#999, #956, #1010, #1021, #1025, #1031, #1040), multi-variant title search, multi-book flat-folder grouping, language detection from AA paths, "Leave in Place" output handler, and several quality-of-life improvements
+> - [SloppyTurtle/pulsarr](https://github.com/SloppyTurtle/pulsarr) — author watchlist database, REST API, and test suite (issue #1)
+>
+> See `git log --grep="Cherry-picked from"` for the full list of attributed commits. Thanks to the maintainers of each fork for the work being ported.
+
 Shelfmark is a self-hosted web interface for searching and requesting books and audiobooks across multiple sources. Bring your own sources, metadata providers, and download clients to build a single hub for your digital library. Supports multiple users with a built-in request system, so you can share your instance with others and let them browse and request books on their own.
 
 Works great alongside the following library tools, with support for automatic imports:
