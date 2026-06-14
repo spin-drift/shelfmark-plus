@@ -35,6 +35,7 @@ export interface ActivityItem {
 
   timestamp: number;
   username?: string;
+  displayName?: string;
 
   downloadBookId?: string;
   downloadRetryAvailable?: boolean;

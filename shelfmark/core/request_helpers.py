@@ -157,20 +157,25 @@ def normalize_optional_positive_int(value: object, field_name: str = "value") ->
 
 
 def populate_request_usernames(rows: list[dict[str, Any]], user_db: object) -> None:
-    """Add 'username' to each request row by looking up user_id."""
+    """Add 'username' and 'display_name' to each request row by looking up user_id."""
     if not _is_user_db_like(user_db):
         return
 
-    cache: dict[int, str] = {}
+    cache: dict[int, dict[str, str | None]] = {}
     for row in rows:
         requester_id = normalize_positive_int(row.get("user_id"))
         if requester_id is None:
             row["username"] = ""
+            row["display_name"] = None
             continue
         if requester_id not in cache:
             requester = user_db.get_user(user_id=requester_id)
-            cache[requester_id] = requester.get("username", "") if requester else ""
-        row["username"] = cache[requester_id]
+            cache[requester_id] = {
+                "username": requester.get("username", "") if requester else "",
+                "display_name": requester.get("display_name") if requester else None,
+            }
+        row["username"] = cache[requester_id]["username"]
+        row["display_name"] = cache[requester_id]["display_name"]
 
 
 def extract_release_source_id(release_data: object) -> str | None:

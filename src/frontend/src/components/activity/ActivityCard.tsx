@@ -230,6 +230,30 @@ const toSourceLabel = (value: unknown): string => {
     .join(' ');
 };
 
+const formatRelativeTime = (epochMs: number): string => {
+  if (!epochMs || !Number.isFinite(epochMs)) {
+    return '';
+  }
+  const diffMs = Date.now() - epochMs;
+  const diffSec = Math.floor(diffMs / 1000);
+  if (diffSec < 60) {
+    return 'just now';
+  }
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) {
+    return `${diffMin}m ago`;
+  }
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) {
+    return `${diffHr}h ago`;
+  }
+  const diffDay = Math.floor(diffHr / 24);
+  if (diffDay < 7) {
+    return `${diffDay}d ago`;
+  }
+  return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(epochMs);
+};
+
 const formatDateTime = (isoDate: string): string => {
   const parsed = Date.parse(isoDate);
   if (!Number.isFinite(parsed)) {
@@ -786,6 +810,11 @@ export const ActivityCard = ({
           <p className="mt-0.5 truncate text-[11px] leading-tight opacity-60" title={item.metaLine}>
             {item.metaLine}
           </p>
+          {item.timestamp > 0 && (
+            <p className="mt-0 text-[10px] leading-tight opacity-40">
+              {formatRelativeTime(item.timestamp)}
+            </p>
+          )}
 
           {noteLine && (
             <p className="mt-0.5 truncate text-[11px] italic opacity-60" title={noteLine}>

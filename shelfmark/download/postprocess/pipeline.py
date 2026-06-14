@@ -27,6 +27,7 @@ from .custom_script import (
     run_custom_script,
 )
 from .destination import get_final_destination, validate_destination
+from .group import group_book_files
 from .prepare import build_output_plan, prepare_output_files
 from .scan import (
     collect_directory_files,
@@ -55,6 +56,7 @@ from .workspace import (
 )
 
 __all__ = [
+    "group_book_files",
     "CustomScriptContext",
     "CustomScriptExecution",
     "CustomScriptTransferSummary",

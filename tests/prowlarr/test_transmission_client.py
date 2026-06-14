@@ -383,6 +383,42 @@ class TestTransmissionClientGetStatus:
             assert status.complete is True
             assert "/downloads/Test Torrent" in status.file_path
 
+    def test_get_status_stopped_treated_as_complete(self, monkeypatch):
+        """Regression: torrents stopped after seeding ratio/idle limit must show complete."""
+        config_values = {
+            "TRANSMISSION_URL": "http://localhost:9091",
+            "TRANSMISSION_USERNAME": "admin",
+            "TRANSMISSION_PASSWORD": "password",
+            "TRANSMISSION_CATEGORY": "test",
+        }
+        monkeypatch.setattr(
+            "shelfmark.download.clients.transmission.config.get",
+            make_config_getter(config_values),
+        )
+
+        mock_torrent = MockTorrent(
+            percent_done=1.0,
+            status="stopped",
+            download_dir="/downloads",
+        )
+        mock_client_instance = MagicMock()
+        mock_client_instance.get_torrent.return_value = mock_torrent
+
+        mock_transmission_rpc = create_mock_transmission_rpc_module()
+        mock_transmission_rpc.Client.return_value = mock_client_instance
+
+        with patch.dict("sys.modules", {"transmission_rpc": mock_transmission_rpc}):
+            if "shelfmark.download.clients.transmission" in sys.modules:
+                del sys.modules["shelfmark.download.clients.transmission"]
+
+            from shelfmark.download.clients.transmission import TransmissionClient
+
+            client = TransmissionClient()
+            status = client.get_status("abc123")
+
+        assert status.complete is True
+        assert status.progress == 100.0
+
     def test_get_status_not_found(self, monkeypatch):
         """Test status for non-existent torrent."""
         config_values = {

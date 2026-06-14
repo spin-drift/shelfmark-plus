@@ -187,13 +187,24 @@ class IRCReleaseSource(ReleaseSource):
                 self._online_servers = set(cached.get("online_servers", []))
                 return cached["releases"]
 
-        # Build search query
-        query = plan.primary_query or self._build_query(book)
-        if not query:
+        # Build ordered query list — max 2 IRC round-trips (clean title first, full title fallback)
+        queries: list[str] = []
+        if plan.title_variants:
+            seen_irc: set[str] = set()
+            for variant in plan.title_variants[:2]:
+                q = variant.query
+                if q and q not in seen_irc:
+                    seen_irc.add(q)
+                    queries.append(q)
+        if not queries:
+            fallback = self._build_query(book)
+            if fallback:
+                queries.append(fallback)
+        if not queries:
             logger.warning("No search query could be built")
             return []
 
-        logger.info("IRC search: %s", query)
+        logger.info("IRC search: %s", queries[0])
 
         # Enforce rate limit
         _enforce_rate_limit()
@@ -221,14 +232,23 @@ class IRCReleaseSource(ReleaseSource):
             # Capture online servers (elevated users in channel)
             self._online_servers = client.online_servers
 
-            # Send search request
-            search_msg = f"@{search_bot} {query}" if search_bot else query
-            client.send_message(f"#{channel}", search_msg)
-
-            # Wait for results DCC - this is the long wait
-            _emit_status(f"Connected to #{channel} - Waiting for results...", phase="searching")
+            # Send search request — try up to 2 query variants (clean title first)
             wait_kwargs = {"expected_senders": {search_bot}} if search_bot else {}
-            offer = client.wait_for_dcc(timeout=60.0, result_type=True, **wait_kwargs)
+            offer = None
+            for attempt, query in enumerate(queries):
+                search_msg = f"@{search_bot} {query}" if search_bot else query
+                client.send_message(f"#{channel}", search_msg)
+                _emit_status(f"Connected to #{channel} - Waiting for results...", phase="searching")
+                offer = client.wait_for_dcc(timeout=60.0, result_type=True, **wait_kwargs)
+                if offer:
+                    break
+                if attempt < len(queries) - 1:
+                    logger.info(
+                        "IRC: no results for %r, retrying with %r",
+                        query,
+                        queries[attempt + 1],
+                    )
+
             if not offer:
                 logger.info("No search results received")
                 _emit_status("No results found", phase="complete")

@@ -473,6 +473,9 @@ def _minimal_request_snapshot(request_row: dict[str, Any], request_id: int) -> d
     username = request_row.get("username")
     if isinstance(username, str):
         minimal_request["username"] = username
+    display_name = request_row.get("display_name")
+    if display_name is not None:
+        minimal_request["display_name"] = display_name
     return {"kind": "request", "request": minimal_request}
 
 
@@ -1021,12 +1024,22 @@ def register_activity_routes(
                     download_row,
                     has_live_queue_entry=task_id in live_queue_index,
                 )
-                payload.append(
-                    DownloadHistoryService.to_history_row(
-                        effective_download_row,
-                        dismissed_at=dismissed_at,
-                    )
+                history_entry = DownloadHistoryService.to_history_row(
+                    effective_download_row,
+                    dismissed_at=dismissed_at,
                 )
+                uid = normalize_positive_int(download_row.get("user_id"))
+                if uid is not None:
+                    try:
+                        db_user = user_db.get_user(user_id=uid)
+                        display_name = db_user.get("display_name") if db_user else None
+                    except AttributeError, KeyError, TypeError:
+                        display_name = None
+                    if isinstance(history_entry.get("snapshot"), dict):
+                        dl = history_entry["snapshot"].get("download")
+                        if isinstance(dl, dict):
+                            dl["display_name"] = display_name
+                payload.append(history_entry)
                 continue
 
             if item_type == "request":
