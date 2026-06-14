@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import re
-from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 # "Title [ID] - 01 - Chapter Name" → "Title [ID]"
 _CHAPTER_PATTERN = re.compile(r"^(.*?)\s+-\s+\d+\s+-\s+.+$")

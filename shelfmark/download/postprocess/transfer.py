@@ -15,7 +15,6 @@ from shelfmark.core.naming import (
     parse_naming_template,
     sanitize_filename,
 )
-from shelfmark.download.postprocess.group import group_book_files
 from shelfmark.core.utils import is_audiobook as check_audiobook
 from shelfmark.download.fs import (
     atomic_copy,
@@ -23,6 +22,7 @@ from shelfmark.download.fs import (
     atomic_move,
     run_blocking_io,
 )
+from shelfmark.download.postprocess.group import group_book_files
 from shelfmark.download.postprocess.policy import get_file_organization, get_template
 
 from .scan import collect_directory_files, scan_directory_tree

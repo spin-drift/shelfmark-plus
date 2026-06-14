@@ -17,7 +17,6 @@ implementation stay modular.
 
 from __future__ import annotations
 
-from .group import group_book_files
 from .custom_script import (
     CustomScriptContext,
     CustomScriptExecution,
@@ -28,6 +27,7 @@ from .custom_script import (
     run_custom_script,
 )
 from .destination import get_final_destination, validate_destination
+from .group import group_book_files
 from .prepare import build_output_plan, prepare_output_files
 from .scan import (
     collect_directory_files,

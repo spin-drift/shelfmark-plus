@@ -1562,7 +1562,7 @@ def _enrich_queue_status_with_display_names(
                 try:
                     row = db.get_user(user_id=uid_raw)
                     cache[uid_raw] = row.get("display_name") if row else None
-                except Exception:
+                except (AttributeError, KeyError, TypeError):
                     cache[uid_raw] = None
             book["display_name"] = cache[uid_raw]
 

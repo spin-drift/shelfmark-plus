@@ -7,21 +7,19 @@ books) into one directory. ABS needs one subfolder per book, not a flat pile.
 
 from pathlib import Path
 
-import pytest
-
 from shelfmark.core.models import DownloadTask
 from shelfmark.download.postprocess.transfer import transfer_book_files
 
 
 def _task(**kwargs) -> DownloadTask:
-    defaults = dict(
-        task_id="group-test",
-        source="direct_download",
-        title="Millennial Mage",
-        author="Tess Irondale",
-        format="m4b",
-        content_type="audiobook",
-    )
+    defaults = {
+        "task_id": "group-test",
+        "source": "direct_download",
+        "title": "Millennial Mage",
+        "author": "Tess Irondale",
+        "format": "m4b",
+        "content_type": "audiobook",
+    }
     return DownloadTask(**{**defaults, **kwargs})
 
 
@@ -108,7 +106,7 @@ class TestMultiBookFlatFolder:
             lambda *, is_audiobook, organization_mode: "{Author}/{Title}",
         )
 
-        final_paths, error, _ = transfer_book_files(
+        _final_paths, error, _ = transfer_book_files(
             all_files,
             destination=dest,
             task=_task(),

@@ -1,7 +1,5 @@
 from pathlib import Path
 
-import pytest
-
 from shelfmark.download.postprocess.group import _book_prefix, group_book_files
 
 

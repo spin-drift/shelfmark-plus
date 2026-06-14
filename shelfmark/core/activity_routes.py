@@ -1033,7 +1033,7 @@ def register_activity_routes(
                     try:
                         db_user = user_db.get_user(user_id=uid)
                         display_name = db_user.get("display_name") if db_user else None
-                    except Exception:
+                    except (AttributeError, KeyError, TypeError):
                         display_name = None
                     if isinstance(history_entry.get("snapshot"), dict):
                         dl = history_entry["snapshot"].get("download")
