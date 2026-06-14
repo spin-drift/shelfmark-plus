@@ -275,7 +275,7 @@ Show the option to search for and download both a book and audiobook together.
 
 **Always Use Combined Search**
 
-Force combined search whenever it's available. Locks the combined toggle on; the lock icon replaces the chain in the search bar.
+Force combined search whenever it's available. Locks the combined toggle on.
 
 - **Type:** boolean
 - **Default:** `false`
