@@ -6,7 +6,7 @@
 > This project is in a stable state as of May 2026 but is not under active maintenance. 
 
 > [!IMPORTANT]
-> **This fork is a meta-fork of [calibrain/shelfmark](https://github.com/calibrain/shelfmark)** (which transitioned in May 2026 to maintenance updates only) that selectively ports noteworthy work from community forks while keeping the Shelfmark identity, license, and naming intact. Each port is reviewed per-commit; rebranding, license switches, and major infrastructure changes are left out. Currently tracking:
+> **This fork is a meta-fork of [calibrain/shelfmark](https://github.com/calibrain/shelfmark)** (which transitioned in May 2026 to maintenance updates only) that selectively ports noteworthy work from community forks (and also adds new original features) while keeping the Shelfmark identity, license, and naming intact. Each port is reviewed per-commit; rebranding, license switches, and major infrastructure changes are left out. Currently tracking:
 >
 > - [NemesisHubris/litfinder](https://github.com/NemesisHubris/litfinder) — bug fixes (#999, #956, #1010, #1021, #1025, #1031, #1040), multi-variant title search, multi-book flat-folder grouping, language detection from AA paths, "Leave in Place" output handler, and several quality-of-life improvements
 > - [SloppyTurtle/pulsarr](https://github.com/SloppyTurtle/pulsarr) — author watchlist database, REST API, and test suite (issue #1)
