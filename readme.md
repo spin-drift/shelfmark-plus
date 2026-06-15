@@ -5,7 +5,7 @@
 > [!IMPORTANT]
 > **This is a meta-fork of [calibrain/shelfmark](https://github.com/calibrain/shelfmark)** (which in May 2026 transitioned away from active maintenance) that selectively ports noteworthy work from community forks (and also adds new original features) while keeping the Shelfmark identity, license, and naming intact. Each port is reviewed per-commit; rebranding, license switches, and major infrastructure changes are left out.
 >
-> Where feasible, changes will attempt to be upstreamed (this already happened with https://github.com/spin-drift/shelfmark-plus/pull/1).
+> Where feasible, changes will attempt to be upstreamed: this has happened with https://github.com/spin-drift/shelfmark-plus/pull/1, https://github.com/spin-drift/shelfmark-plus/pull/2).
 >
 > Currently tracking:
 >
